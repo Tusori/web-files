@@ -1,0 +1,102 @@
+body {
+  background-color: #a0a0a0;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+body .side-menu {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background-color: black;
+  width: 50px;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  color: white;
+  transition: width 0.5s;
+}
+body .side-menu h2 {
+  visibility: hidden;
+  font-family: Arial;
+  padding-top: 70px;
+  margin: 20px;
+  opacity: 0;
+  transition: opacity 0.3s 0.3s;
+}
+body .side-menu #menuButton {
+  position: absolute;
+  top: 50px;
+  border: 2px solid white;
+  color: white;
+  border-radius: 4px;
+  background-color: black;
+  width: 50px;
+  height: 30px;
+  transition: 0.5s;
+}
+body .side-menu .menu-items {
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s 0.3s;
+}
+body .side-menu .menu-items button {
+  background-color: black;
+  color: white;
+  border: 0;
+  border-left: 2px solid white;
+  border-right: 2px solid white;
+  height: 30px;
+  width: 170px;
+  font-size: medium;
+  font-weight: bold;
+}
+body .side-menu .menu-items button:hover {
+  background-color: gray;
+}
+body .side-menu.expanded {
+  width: 200px;
+}
+body .side-menu.expanded h2 {
+  opacity: 1;
+  visibility: visible;
+}
+body .side-menu.expanded #menuButton {
+  width: 200px;
+}
+body .side-menu.expanded .menu-items {
+  opacity: 1;
+  visibility: visible;
+}
+body .container {
+  color: white;
+  display: grid;
+  height: 100vh;
+  margin-left: 200px;
+  margin-top: 50px;
+  width: 80%;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  grid-row-gap: 50px;
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+body .container .item {
+  width: 200px;
+  height: 150px;
+  background-color: #808080;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+}
+body .container .item video {
+  width: 200px;
+}/*# sourceMappingURL=style.css.map */
