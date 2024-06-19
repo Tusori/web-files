@@ -4,6 +4,8 @@ async function fetchVideos() {
         const videoFiles = await response.json();
         const gridContainer = document.getElementById('gridContainer');
 
+        gridContainer.innerHTML = ''; //очиста грид контейнера
+
         videoFiles.forEach((file, index) => {
             const item = document.createElement('div');
             item.className = 'item';
@@ -16,7 +18,8 @@ async function fetchVideos() {
 
             const p = document.createElement('p');
             p.setAttribute('ondblclick', 'editTitle(this)');
-            p.innerText = file.split('.')[0]; //ипользуем имя файла без расширения
+            const storedTitle = localStorage.getItem(`title_${item.id}`);
+            p.innerText = storedTitle ? storedTitle : file.split('.')[0]; //ипользуем имя файла без расширения
 
             item.appendChild(video);
             item.appendChild(p);
@@ -31,22 +34,58 @@ function openVideo(videoUrl) {
     window.open(videoUrl, '_blank');
 }
 
-function editTitle(element) {
+async function editTitle(element) {
     const newTitle = prompt('Enter new title:', element.innerText);
     if (newTitle !== null) {
-        element.innerText = newTitle;
         const itemId = element.parentNode.id;
         
-        // Обновляем имя файла
+        //получаем элемент <video> и его текущий src
         const videoElement = document.getElementById(itemId).querySelector('video');
         const currentSrc = videoElement.src;
-        const newSrc = currentSrc.replace(/\/[^/]+$/, `/${newTitle}.mp4`); // Заменяем последний сегмент URL на новое имя
-        videoElement.src = newSrc;
+        const currentFileName = currentSrc.split('/').pop();
+        const newFileName = `${newTitle}.mp4`;
+        
+        try {
+            //отправляем запрос на сервер для переименования файла
+            const renameResponse = await fetch(`/rename/${currentFileName}/${newFileName}`, {
+                method: 'PUT'
+            });
 
-        // Сохраняем новый заголовок в localStorage
-        localStorage.setItem(`title_${itemId}`, newTitle);
+            if (!renameResponse.ok) {
+                throw new Error('Failed to rename file');
+            }
+
+            // Обновляем DOM
+            element.innerText = newTitle;
+            const newSrc = currentSrc.replace(/\/[^/]+$/, `/${newFileName}`); //заменяем последний сегмент url на новое имя
+            videoElement.src = newSrc;
+
+            // Сохраняем новый заголовок в localStorage
+            localStorage.setItem(`title_${itemId}`, newTitle);
+        } 
+        catch (error) {
+            console.error('Error renaming file:', error);
+            alert('Failed to rename file');
+        }
     }
 }
+
+// function editTitle(element) {
+//     const newTitle = prompt('Enter new title:', element.innerText);
+//     if (newTitle !== null) {
+//         element.innerText = newTitle;
+//         const itemId = element.parentNode.id;
+        
+//         // Обновляем имя файла
+//         const videoElement = document.getElementById(itemId).querySelector('video');
+//         const currentSrc = videoElement.src;
+//         const newSrc = currentSrc.replace(/\/[^/]+$/, `/${newTitle}.mp4`); // Заменяем последний сегмент URL на новое имя
+//         videoElement.src = newSrc;
+
+//         // Сохраняем новый заголовок в localStorage
+//         localStorage.setItem(`title_${itemId}`, newTitle);
+//     }
+// }
 
 //загрузка видео при загрузке страницы
 fetchVideos();
@@ -61,32 +100,35 @@ function sideMenu(){
 }
 
 function addFileFunction(){
-    var inputFile = document.createElement('input');
-    inputFile.type = 'file';
-    inputFile.style.display = 'none';
-    inputFile.multiple = false; 
+    document.getElementById('fileInput').click();
+}
 
-    document.body.appendChild(inputFile);
+function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
     
-    inputFile.click();
-
-    inputFile.addEventListener('change', function() {
-        var selectedFile = inputFile.files[0];
-        if(selectedFile) {
-            var filePath = URL.createObjectURL(selectedFile); //сохраняет путь файла
-
-            //создание нового элемента для грид контейнера
-            var gridContainer = document.getElementById('gridContainer');
-            var newItem = document.createElement('div');
-            newItem.classList.add('item');
-            newItem.textContent = selectedFile.name; //название файла
-
-            gridContainer.appendChild(newItem); //добавление нового элемента в грид
-
-            
-        }
+    if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
         
-    });
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('File uploaded successfully');
+                fetchVideos(); // Перезагружаем список видео
+            } else {
+                alert('Failed to upload file');
+            }
+        })
+        .catch(error => {
+            console.error('Error uploading file:', error);
+            alert('Error uploading file');
+        });
+    }
 }
 
 //grid elementu nosaukuma mainisana
@@ -101,41 +143,50 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 });
 
-// function editTitle(element) {
-//     var currentTitle = element.textContent;
-//     var input = document.createElement('input');
-//     input.type = 'text';
-//     input.value = currentTitle;
+//delete
+function deleteFileFunction() {
+    const gridContainer = document.getElementById('gridContainer');
+    const items = gridContainer.querySelectorAll('.item');
 
-//     element.replaceWith(input);
-//     input.focus();
+    items.forEach(item => {
+        // Удаляем существующий оверлей, если он есть
+        const existingOverlay = item.querySelector('.overlay');
+        if (existingOverlay) {
+            item.removeChild(existingOverlay);
+        }
 
-//     input.addEventListener('blur', function() {
-//         saveTitle(element, input);
-//     });
+        // Создаем новый оверлей
+        const overlay = document.createElement('div');
+        overlay.classList.add('overlay');
+        item.appendChild(overlay);
 
-//     input.addEventListener('keypress', function(event) {
-//         if (event.key === 'Enter') {
-//             saveTitle(element, input);
-//         }
-//     });
-// }
+        // Обработчик клика для выделения элемента
+        overlay.addEventListener('click', function handleOverlayClick(e) {
+            e.stopPropagation();
+            item.classList.toggle('selected');
+        }, { once: true });
+    });
 
-// function saveTitle(element, input) {
-//     element.textContent = input.value;
-//     input.replaceWith(element);
+    //показываем кнопки OK и cancel
+    const deleteButtonContainer = document.getElementById('deleteButtons');
+    deleteButtonContainer.classList.add('true');
+}
 
-//     var itemId = element.parentElement.id;
-//     localStorage.setItem('title_' + itemId, input.value);
+function cancelDelete() {
+    const gridContainer = document.getElementById('gridContainer');
+    const items = gridContainer.querySelectorAll('.item');
 
-//     //обновляем содержимое <p> тега в HTML-документе
-//     let paragraph = document.querySelector('#' + itemId + ' p');
-//     if (paragraph) {
-//         paragraph.textContent = input.value;
-//     }
-// }
+    items.forEach(item => {
+        // Убираем выделение с элемента
+        item.classList.remove('selected');
+        // Удаляем оверлей
+        const overlay = item.querySelector('.overlay');
+        if (overlay) {
+            item.removeChild(overlay);
+        }
+    });
 
-// function openVideo(videoURL){
-//     window.open(videoURL, "_blank")
-    
-// }
+    // Прячем кнопки "OK" и "Cancel"
+    const deleteButtonContainer = document.getElementById('deleteButtons');
+    deleteButtonContainer.classList.remove('true');
+}

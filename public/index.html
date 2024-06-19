@@ -8,10 +8,17 @@
 <body>
     <div class="side-menu" id="sideMenu">
         <button id="menuButton" onclick="sideMenu()">| | |</button>
-        <h2>menu header</h2>
+        <h2>MENU</h2>
 
         <div class="menu-items">
             <button id="addFiles" onclick="addFileFunction()">add file</button>
+            <input type="file" id="fileInput" style="display: none;" onchange="uploadFile()" />
+            <button id="deleteFiles" onclick="deleteFileFunction()">delete file</button>
+
+            <div class="deleteButtonContainer" id="deleteButtons">
+                <button class="deleteButtonItem" id="deleteFilesAccept">ok</button>
+                <button class="deleteButtonItem" id="deleteFilesCancel" onclick="cancelDelete()">cancel</button>
+            </div>
             
         </div>
         
