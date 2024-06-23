@@ -55,12 +55,12 @@ async function editTitle(element) {
                 throw new Error('Failed to rename file');
             }
 
-            // Обновляем DOM
+            //обновляем DOM
             element.innerText = newTitle;
             const newSrc = currentSrc.replace(/\/[^/]+$/, `/${newFileName}`); //заменяем последний сегмент url на новое имя
             videoElement.src = newSrc;
 
-            // Сохраняем новый заголовок в localStorage
+            //сохраняем новый заголовок в localstorage
             localStorage.setItem(`title_${itemId}`, newTitle);
         } 
         catch (error) {
@@ -76,13 +76,11 @@ async function editTitle(element) {
 //         element.innerText = newTitle;
 //         const itemId = element.parentNode.id;
         
-//         // Обновляем имя файла
+//         //обновляем имя файла
 //         const videoElement = document.getElementById(itemId).querySelector('video');
 //         const currentSrc = videoElement.src;
 //         const newSrc = currentSrc.replace(/\/[^/]+$/, `/${newTitle}.mp4`); // Заменяем последний сегмент URL на новое имя
 //         videoElement.src = newSrc;
-
-//         // Сохраняем новый заголовок в localStorage
 //         localStorage.setItem(`title_${itemId}`, newTitle);
 //     }
 // }
@@ -119,7 +117,7 @@ function uploadFile() {
         .then(data => {
             if (data.success) {
                 alert('File uploaded successfully');
-                fetchVideos(); // Перезагружаем список видео
+                fetchVideos(); //заполняем старницу по новой видосами
             } else {
                 alert('Failed to upload file');
             }
@@ -133,7 +131,7 @@ function uploadFile() {
 
 //grid elementu nosaukuma mainisana
 document.addEventListener('DOMContentLoaded', (event) => {
-    //localStorage
+    //local storage
     document.querySelectorAll('.item p').forEach(paragraph => {
         const itemId = paragraph.parentElement.id;
         const savedTitle = localStorage.getItem('title_' + itemId);
@@ -149,25 +147,25 @@ function deleteFileFunction() {
     const items = gridContainer.querySelectorAll('.item');
 
     items.forEach(item => {
-        // Удаляем существующий оверлей, если он есть
+        //удаляем существующий оверлей, если он есть
         const existingOverlay = item.querySelector('.overlay');
         if (existingOverlay) {
             item.removeChild(existingOverlay);
         }
 
-        // Создаем новый оверлей
+        //создаем новый оверлей
         const overlay = document.createElement('div');
         overlay.classList.add('overlay');
         item.appendChild(overlay);
 
-        // Обработчик клика для выделения элемента
+        //кликаем для выделения элемента
         overlay.addEventListener('click', function handleOverlayClick(e) {
             e.stopPropagation();
             item.classList.toggle('selected');
         }, { once: true });
     });
 
-    //показываем кнопки OK и cancel
+    //показываем кнопки ок и cancel
     const deleteButtonContainer = document.getElementById('deleteButtons');
     deleteButtonContainer.classList.add('true');
 }
@@ -177,16 +175,16 @@ function cancelDelete() {
     const items = gridContainer.querySelectorAll('.item');
 
     items.forEach(item => {
-        // Убираем выделение с элемента
+        //убираем выделение с элемента
         item.classList.remove('selected');
-        // Удаляем оверлей
+        //кдаляем оверлей
         const overlay = item.querySelector('.overlay');
         if (overlay) {
             item.removeChild(overlay);
         }
     });
 
-    // Прячем кнопки "OK" и "Cancel"
+    //прячем кнопки ок и cancel
     const deleteButtonContainer = document.getElementById('deleteButtons');
     deleteButtonContainer.classList.remove('true');
 }
