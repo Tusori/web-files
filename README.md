@@ -4,8 +4,8 @@ local multimedia file server with web interface
 install node.js
 than open terminal in the project root deirectory and type :
 
-  node -v
-  npm -v
+  node -v/a
+  npm -v/a
 
 if you see current versions, run:
   npm init -y
