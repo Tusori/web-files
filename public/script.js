@@ -162,12 +162,15 @@ function deleteFileFunction() {
         overlay.addEventListener('click', function handleOverlayClick(e) {
             e.stopPropagation();
             item.classList.toggle('selected');
-        }, { once: true });
+        });
     });
 
     //показываем кнопки ок и cancel
     const deleteButtonContainer = document.getElementById('deleteButtons');
     deleteButtonContainer.classList.add('true');
+
+    const deleteButton = document.getElementById('deleteFiles');
+    deleteButton.style.backgroundColor = 'gray';
 }
 
 function cancelDelete() {
@@ -187,4 +190,44 @@ function cancelDelete() {
     //прячем кнопки ок и cancel
     const deleteButtonContainer = document.getElementById('deleteButtons');
     deleteButtonContainer.classList.remove('true');
+
+    const deleteButton = document.getElementById('deleteFiles');
+    deleteButton.style.backgroundColor = 'black';
+}
+
+document.getElementById('deleteFilesAccept').addEventListener('click', deleteSelectedFiles);
+
+function deleteSelectedFiles() {
+    const selectedItems = document.querySelectorAll('.item.selected');
+    const fileNames = Array.from(selectedItems).map(item => {
+        const video = item.querySelector('video');
+        const filePath = video.src;
+        const fileName = filePath.split('/').pop(); //получаем имя файла из полного пути
+        return fileName;
+    });
+
+    if (fileNames.length > 0) {
+        fetch('/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ files: fileNames })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(result => {
+            if (result.success) {
+                selectedItems.forEach(item => item.remove());
+                cancelDelete(); //спрятать кнопки ок и cancel после удаления
+            } else {
+                alert('Ошибка при удалении файлов');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 }

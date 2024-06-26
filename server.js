@@ -8,6 +8,7 @@ const PORT = 3000;
 const videoDirectory = path.join(__dirname, 'public', 'savedfiles');
 
 app.use(express.static('public'));
+app.use(express.json());
 
 app.get('/videos', (req, res) => {
     fs.readdir(videoDirectory, (err, files) => {
@@ -59,6 +60,29 @@ app.post('/upload', upload.single('file'), (req, res) => {
         return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
     res.json({ success: true, message: 'File uploaded successfully' });
+});
+
+//удаления файлов
+app.post('/delete', (req, res) => {
+    const filesToDelete = req.body.files;
+    console.log('Files to delete:', filesToDelete); //логи
+    if (!Array.isArray(filesToDelete) || filesToDelete.length === 0) {
+        return res.status(400).json({ success: false, message: 'No files specified for deletion' });
+    }
+
+    let deletePromises = filesToDelete.map(fileName => {
+        const filePath = path.join(videoDirectory, fileName);
+        return fs.promises.unlink(filePath);
+    });
+
+    Promise.all(deletePromises)
+        .then(() => {
+            res.json({ success: true, message: 'Files deleted successfully' });
+        })
+        .catch(err => {
+            console.error('Error deleting files:', err);
+            res.status(500).json({ success: false, message: 'Error deleting files', error: err });
+        });
 });
 
 app.listen(PORT, () => {

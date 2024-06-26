@@ -50,6 +50,7 @@ body .side-menu .menu-items {
   transition: opacity 0.3s 0.3s;
 }
 body .side-menu .menu-items button {
+  cursor: pointer;
   background-color: black;
   color: white;
   border: 0;
@@ -70,12 +71,19 @@ body .side-menu .menu-items .deleteButtonContainer {
   align-items: center;
   gap: 10px;
   visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s 0.2s;
 }
 body .side-menu .menu-items .deleteButtonContainer .deleteButtonItem {
   display: inline-block;
   width: 80px;
-  height: 40px;
-  border: 3px solid red;
+  height: 30px;
+  border-left: 2px solid red;
+  border-right: 2px solid red;
+}
+body .side-menu .menu-items .deleteButtonContainer #deleteFilesCancel {
+  border-left: 2px solid white;
+  border-right: 2px solid white;
 }
 body .side-menu.expanded {
   width: 240px;
@@ -92,6 +100,7 @@ body .side-menu.expanded .menu-items {
   visibility: visible;
 }
 body .side-menu.expanded .deleteButtonContainer.true {
+  opacity: 1;
   visibility: visible;
 }
 body .container {
@@ -147,5 +156,5 @@ body .container .item .overlay {
   cursor: pointer;
 }
 body .container .item.selected {
-  border: 5px solid black;
+  border: 5px solid rgb(255, 255, 255);
 }/*# sourceMappingURL=style.css.map */
